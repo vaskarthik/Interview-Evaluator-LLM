@@ -1,21 +1,30 @@
+from google import genai
 import os
-import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-def call_llm(prompt: str, temperature: float = 0.0) -> str:
-    model = genai.GenerativeModel("gemini-1.5-flash")
-
-    response = model.generate_content(
-        prompt,
-        generation_config={
+''' def call_llm(prompt: str, temperature: float = 0.0) -> str:
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=prompt,
+        config={
             "temperature": temperature,
-            "top_p": 1.0,
             "max_output_tokens": 512
         }
     )
 
-    return response.text
+    return response.text  '''
+
+def call_llm(prompt: str, temperature: float = 0.0) -> str:
+    return """
+    {
+      "score": 7,
+      "strengths": ["Correct basic concept"],
+      "weaknesses": ["Lacks depth"],
+      "improvements": ["Add examples"],
+      "final_feedback": "Good but needs improvement"
+    }
+    """

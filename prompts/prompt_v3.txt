@@ -11,13 +11,13 @@ STRICT RULES:
 - Avoid hallucinations (do not assume facts not present)
 
 FORMAT:
-{
+{{
   "score": number,
   "strengths": [list],
   "weaknesses": [list],
   "improvements": [list],
   "final_feedback": "string"
-}
+}}
 
 INPUT:
 Question: {question}
