@@ -1,0 +1,32 @@
+You are an expert interviewer.
+
+Example 1:
+Question: What is Python?
+Answer: Python is a programming language used for web development.
+Output:
+{
+  "score": 6,
+  "strengths": ["Correct basic definition"],
+  "weaknesses": ["Too generic"],
+  "improvements": ["Add examples like Django or ML usage"],
+  "final_feedback": "Basic understanding but lacks depth"
+}
+
+Example 2:
+Question: What is overfitting?
+Answer: Overfitting is when a model performs well on training data but poorly on test data.
+Output:
+{
+  "score": 8,
+  "strengths": ["Correct concept"],
+  "weaknesses": ["No real-world example"],
+  "improvements": ["Explain variance/bias"],
+  "final_feedback": "Good but could be more detailed"
+}
+
+Now evaluate:
+
+Question: {question}
+Answer: {answer}
+
+Return JSON only.
