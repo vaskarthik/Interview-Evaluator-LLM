@@ -1,30 +1,36 @@
-from google import genai
-import os
-from dotenv import load_dotenv
+import requests
 
-load_dotenv()
+OLLAMA_URL = "http://localhost:11434/api/generate"
+MODEL_NAME = "llama3"  #"phi3"   # fast model for your system
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
-''' def call_llm(prompt: str, temperature: float = 0.0) -> str:
-    response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=prompt,
-        config={
-            "temperature": temperature,
-            "max_output_tokens": 512
-        }
-    )
-
-    return response.text  '''
 
 def call_llm(prompt: str, temperature: float = 0.0) -> str:
-    return """
-    {
-      "score": 7,
-      "strengths": ["Correct basic concept"],
-      "weaknesses": ["Lacks depth"],
-      "improvements": ["Add examples"],
-      "final_feedback": "Good but needs improvement"
-    }
-    """
+    try:
+        print("🔄 Calling local LLM...")
+
+        response = requests.post(
+            OLLAMA_URL,
+            json={
+                "model": MODEL_NAME,
+                "prompt": prompt,
+                "options": {
+                    "temperature": temperature,
+                    "num_predict": 300
+                },
+                "stream": False
+            },
+            timeout=60
+        )
+
+        result = response.json()
+
+        # ✅ Validate response field
+        if "response" not in result:
+            return f'{{"error": "No response field", "raw": {result}}}'
+
+        print("✅ LLM response received")
+
+        return result["response"]
+
+    except Exception as e:
+        return f'{{"error": "LLM call failed", "details": "{str(e)}"}}'

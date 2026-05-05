@@ -12,6 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 PROMPT_PATH = BASE_DIR / "prompts"
 
 
+# ✅ Load prompt file
 def load_prompt(version: str) -> str:
     file_map = {
         "v1": "prompt_v1.txt",
@@ -23,12 +24,71 @@ def load_prompt(version: str) -> str:
         return f.read()
 
 
-# 🔍 Extract JSON safely from LLM output
+# ✅ Extract JSON block from LLM output
 def extract_json(text: str) -> str:
-    match = re.search(r'\{[\s\S]*?\}', text)
-    return match.group(0) if match else text
+    matches = re.findall(r'\{.*\}', text, re.DOTALL)
+    return matches[-1] if matches else text
 
 
+# ✅ Repair + parse JSON
+def safe_json_load(text: str):
+    try:
+        return json.loads(text)
+    except:
+        text = text.replace("\n", " ")
+
+        # Fix common issues
+        text = re.sub(r'"\s*yn\s*"', '": "', text)
+        text = re.sub(r'"\s*:\s*"', '": "', text)
+        text = re.sub(r',\s*}', '}', text)
+        text = re.sub(r',\s*]', ']', text)
+
+        try:
+            return json.loads(text)
+        except:
+            return None
+
+
+# ✅ Validate expected schema
+def is_valid_evaluation(parsed: dict) -> bool:
+    required_keys = [
+        "score",
+        "strengths",
+        "weaknesses",
+        "improvements",
+        "final_feedback"
+    ]
+    return all(key in parsed for key in required_keys)
+
+
+# ✅ Retry logic
+def call_with_retry(prompt: str, temperature: float, retries: int = 2):
+    last_response = ""
+
+    for attempt in range(retries):
+        print(f"🔄 LLM attempt {attempt + 1}")
+
+        response = call_llm(prompt, temperature)
+        last_response = response
+
+        print("📦 Raw LLM output:", response[:200])  # debug
+
+        cleaned = extract_json(response)
+        parsed = safe_json_load(cleaned)
+
+        if parsed and is_valid_evaluation(parsed):
+            print("✅ Valid evaluation JSON received")
+            return parsed
+
+        print("⚠️ Invalid or incomplete JSON, retrying...")
+
+    return {
+        "error": "Invalid JSON from LLM",
+        "raw_output": last_response
+    }
+
+
+# ✅ Main evaluation function
 def evaluate_answer(
     question: str,
     answer: str,
@@ -37,42 +97,34 @@ def evaluate_answer(
 ):
     base_prompt = load_prompt(prompt_version)
 
-    # ✅ Safe replacement (avoids .format() JSON issues)
     final_prompt = (
         base_prompt
         .replace("{question}", question)
         .replace("{answer}", answer)
     )
 
-    response = call_llm(final_prompt, temperature)
+    parsed = call_with_retry(final_prompt, temperature)
 
-    cleaned = extract_json(response)
+    if "error" in parsed:
+        return parsed
 
-    try:
-        parsed = json.loads(cleaned)
+    # Normalize score
+    if isinstance(parsed.get("score"), str):
+        try:
+            parsed["score"] = int(parsed["score"].split("/")[0])
+        except:
+            parsed["score"] = None
 
-        # ✅ Normalize score (handle "6/10" → 6)
-        if isinstance(parsed.get("score"), str):
-            try:
-                parsed["score"] = int(parsed["score"].split("/")[0])
-            except Exception:
-                parsed["score"] = None
-
-        # ✅ Ensure required fields exist
-        parsed.setdefault("strengths", [])
-        parsed.setdefault("weaknesses", [])
-        parsed.setdefault("improvements", [])
-        parsed.setdefault("final_feedback", "")
-
-    except Exception:
-        parsed = {
-            "error": "Invalid JSON from LLM",
-            "raw_output": response
-        }
+    # Ensure fields
+    parsed.setdefault("strengths", [])
+    parsed.setdefault("weaknesses", [])
+    parsed.setdefault("improvements", [])
+    parsed.setdefault("final_feedback", "")
 
     return parsed
 
 
+# ✅ Compare prompts
 def compare_prompt_versions(question: str, answer: str):
     results = {}
 
