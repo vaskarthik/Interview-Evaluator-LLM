@@ -12,13 +12,13 @@ This branch demonstrates the transition from API-based LLM usage to a **fully lo
 
 Compared to the `main` branch:
 
-| Feature                | main (API)   | this branch (local)         |
-| ---------------------- | ------------ | --------------------------- |
-| LLM source             | Gemini API   | Ollama (local models)       |
-| Cost                   | ❌ Paid usage | ✅ Free                      |
-| Latency                | Fast         | Moderate (CPU-bound)        |
-| Reliability            | High         | Requires retry + validation |
-| Engineering complexity | Medium       | High                        |
+| Feature                | main (API)    | this branch (local)         |
+| ---------------------- | ------------  | ----------------------------|
+| LLM source             | Gemini API    | Ollama (local models)       |
+| Cost                   | ❌ Paid usage | ✅ Free                    |
+| Latency                | Fast          | Moderate (CPU-bound)        |
+| Reliability            | High          | Requires retry + validation |
+| Engineering complexity | Medium        | High                        |
 
 ---
 
@@ -64,24 +64,86 @@ Interview-Evaluator-LLM/
 
 👉 https://ollama.com
 
+Download and install Ollama for your operating system.
+Ollama is a local runtime that allows you to **run large language models (LLMs) directly on your machine**, without using any external APIs.
+
+Once installed, it automatically runs a local server at:
+
+```
+http://localhost:11434
+```
+
+This is the endpoint your Python code uses to send prompts and receive responses.
+
 ---
 
-### 2. Pull models
+### 2. Pull Models
 
 ```bash
 ollama pull phi3
+OR
 ollama pull llama3
 ```
 
+This command downloads the models to your local system.
+
+* `phi3` → lightweight, faster, suitable for development
+* `llama3` → larger, slower, but more accurate
+
+📦 These models are stored locally, so you only need to download them once.
+
 ---
 
-### 3. Run a model (example)
+### 3. Run a Model (Optional Manual Test)
 
 ```bash
 ollama run phi3
 ```
 
+This starts an interactive terminal where you can directly chat with the model.
+
+Example:
+
+```
+>>> What is overfitting?
+```
+
+This step is useful to:
+
+* verify the model is working correctly
+* understand response quality
+* debug issues before integrating with your code
+
+👉 You can exit using:
+
+```
+Ctrl + D
+```
+
 ---
+
+### 4. How It Connects to This Project
+
+This application does NOT use the interactive mode.
+
+Instead, it sends HTTP requests to:
+
+```
+http://localhost:11434/api/generate
+```
+
+Flow:
+
+```
+Your Python Code → Ollama Server → Local Model → Response
+```
+
+This enables:
+
+* fully offline execution
+* zero API cost
+* full control over model behavior
+
 
 ### 4. Install dependencies
 
@@ -169,7 +231,7 @@ Final Structured Output
 
 | Model  | Speed   | Accuracy | Recommended Use  |
 | ------ | ------- | -------- | ---------------- |
-| phi3   | ⚡ Fast  | Medium   | Development      |
+| phi3   | ⚡ Fast | Medium   | Development      |
 | llama3 | 🐢 Slow | High     | Final evaluation |
 
 ---
@@ -208,7 +270,7 @@ This branch focuses on solving those problems.
 
 ## 👨‍💻 Author
 
-Karthik V S  
+Karthik Vas S  
 GenAI Engineer | LLM Systems | Prompt Engineering | AI Application Development
 
 ---
