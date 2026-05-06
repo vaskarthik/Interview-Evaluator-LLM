@@ -1,151 +1,209 @@
-# 🧠 Interview Evaluation Bot — Local LLM (Ollama Version)
+# 🧠 Interview Evaluation Bot — Local RAG System
 
-This branch demonstrates the transition from API-based LLM usage to a **fully local LLM system** using Ollama.
+## 📌 Overview
 
-👉 No external API calls
-👉 No cost
-👉 Runs entirely on your machine
+This project is a fully local Retrieval Augmented Generation (RAG) based interview evaluation system built using:
 
----
+* Local LLMs via Ollama
+* Embedding models
+* FAISS Vector Database
+* Semantic Retrieval
+* Prompt Engineering
+* Structured JSON validation
 
-## 🚀 What’s New in This Branch
+The system evaluates candidate interview answers using retrieved contextual knowledge and grounded LLM reasoning.
 
-Compared to the `main` branch:
-
-| Feature                | main (API)    | this branch (local)         |
-| ---------------------- | ------------  | ----------------------------|
-| LLM source             | Gemini API    | Ollama (local models)       |
-| Cost                   | ❌ Paid usage | ✅ Free                    |
-| Latency                | Fast          | Moderate (CPU-bound)        |
-| Reliability            | High          | Requires retry + validation |
-| Engineering complexity | Medium        | High                        |
+This branch focuses on understanding and implementing the internal architecture of modern GenAI systems rather than relying only on hosted APIs.
 
 ---
 
-## 🧠 Key Learnings
+# 🚀 Features
 
-This branch focuses on **real-world LLM system challenges**:
-
-* Handling **invalid JSON outputs**
-* Managing **timeouts and slow inference**
-* Implementing **retry mechanisms**
-* Performing **schema validation**
-* Balancing **model size vs performance**
-* Understanding **local LLM limitations**
+* ✅ Fully local inference using Ollama
+* ✅ No paid API dependency
+* ✅ RAG (Retrieval Augmented Generation)
+* ✅ FAISS vector database
+* ✅ Semantic search using embeddings
+* ✅ Prompt augmentation with retrieved context
+* ✅ Structured JSON output validation
+* ✅ Retry + malformed JSON handling
+* ✅ Prompt versioning (`v1`, `v2`, `v3`)
+* ✅ Temperature experimentation
+* ✅ CLI-based evaluation
+* ✅ Streamlit UI support
 
 ---
 
-## 🧱 Project Structure
+# 🧱 Project Architecture
 
+```text
+User Question
+      ↓
+Embedding Generation
+      ↓
+FAISS Vector Search
+      ↓
+Top-K Context Retrieval
+      ↓
+Prompt Augmentation
+      ↓
+Local LLM (Ollama)
+      ↓
+Structured Evaluation Output
 ```
+
+---
+
+# 📂 Project Structure
+
+```text
 Interview-Evaluator-LLM/
 │
 ├── src/
-│   ├── main.py           # CLI interface
-│   ├── evaluator.py      # Evaluation + retry + validation logic
-│   ├── llm_client.py     # Ollama integration
+│   ├── main.py
+│   ├── evaluator.py
+│   ├── llm_client.py
+│   │
+│   ├── rag/
+│   │   ├── embedder.py
+│   │   ├── vector_store.py
+│   │   ├── retriever.py
+│   │   ├── pipeline.py
+│   │   └── data_loader.py
 │
-├── ui/
-│   └── app.py            # Streamlit UI
+├── data/
+│   ├── interview_knowledge.txt
+│   └── chunks.json
+│
+├── vector_db/
 │
 ├── prompts/
 │   ├── prompt_v1.txt
 │   ├── prompt_v2.txt
 │   └── prompt_v3.txt
 │
+├── ui/
+│   └── app.py
+│
+├── build_vector_db.py
+├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## ⚙️ Setup Instructions
+# ⚙️ Tech Stack
 
-### 1. Install Ollama
+| Component       | Technology            |
+| --------------- | --------------------- |
+| Local LLM       | Ollama                |
+| Models          | phi3 / llama3         |
+| Embeddings      | sentence-transformers |
+| Embedding Model | all-MiniLM-L6-v2      |
+| Vector Database | FAISS                 |
+| UI              | Streamlit             |
+| Language        | Python                |
+
+---
+
+# 🧠 Core GenAI Concepts Implemented
+
+## 1. Prompt Engineering
+
+Implemented:
+
+* Zero-shot prompting
+* Few-shot prompting
+* Constraint-based prompting
+* Structured output prompting
+
+---
+
+## 2. Retrieval Augmented Generation (RAG)
+
+The system retrieves relevant contextual knowledge before calling the LLM.
+
+Benefits:
+
+* Reduced hallucinations
+* Grounded responses
+* Better evaluation quality
+
+---
+
+## 3. Embeddings
+
+Text is converted into dense semantic vectors using:
+
+```text
+all-MiniLM-L6-v2
+```
+
+Example:
+
+```text
+"What is overfitting?"
+      ↓
+[0.12, -0.45, 0.88, ...]
+```
+
+---
+
+## 4. Semantic Retrieval
+
+FAISS retrieves the most semantically relevant knowledge chunks using vector similarity search.
+
+---
+
+## 5. Structured Output Validation
+
+The system validates:
+
+* JSON schema
+* score ranges
+* required fields
+* empty outputs
+
+This improves reliability of LLM responses.
+
+---
+
+# 🚀 Setup Instructions
+
+## 1. Install Ollama
+
+Download and install:
 
 👉 https://ollama.com
 
-Download and install Ollama for your operating system.
-Ollama is a local runtime that allows you to **run large language models (LLMs) directly on your machine**, without using any external APIs.
-
-Once installed, it automatically runs a local server at:
-
-```
-http://localhost:11434
-```
-
-This is the endpoint your Python code uses to send prompts and receive responses.
-
 ---
 
-### 2. Pull Models
+## 2. Pull Local Models
 
 ```bash
 ollama pull phi3
-OR
 ollama pull llama3
 ```
 
-This command downloads the models to your local system.
-
-* `phi3` → lightweight, faster, suitable for development
-* `llama3` → larger, slower, but more accurate
-
-📦 These models are stored locally, so you only need to download them once.
-
 ---
 
-### 3. Run a Model (Optional Manual Test)
+## 3. Start Local Model
+
+Recommended for most laptops:
 
 ```bash
 ollama run phi3
 ```
 
-This starts an interactive terminal where you can directly chat with the model.
+This starts the local inference server:
 
-Example:
-
-```
->>> What is overfitting?
-```
-
-This step is useful to:
-
-* verify the model is working correctly
-* understand response quality
-* debug issues before integrating with your code
-
-👉 You can exit using:
-
-```
-Ctrl + D
+```text
+http://localhost:11434
 ```
 
 ---
 
-### 4. How It Connects to This Project
-
-This application does NOT use the interactive mode.
-
-Instead, it sends HTTP requests to:
-
-```
-http://localhost:11434/api/generate
-```
-
-Flow:
-
-```
-Your Python Code → Ollama Server → Local Model → Response
-```
-
-This enables:
-
-* fully offline execution
-* zero API cost
-* full control over model behavior
-
-
-### 4. Install dependencies
+# 📦 Install Python Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -153,9 +211,27 @@ pip install -r requirements.txt
 
 ---
 
-## ▶️ Run the Application
+# 🧠 Build Vector Database
 
-### CLI Mode
+Before running evaluation, generate embeddings and build the FAISS vector DB:
+
+```bash
+python build_vector_db.py
+```
+
+This creates:
+
+```text
+vector_db/
+   ├── faiss_index.bin
+   └── metadata.pkl
+```
+
+---
+
+# ▶️ Run Application
+
+## CLI Mode
 
 ```bash
 python src/main.py
@@ -163,7 +239,7 @@ python src/main.py
 
 ---
 
-### Streamlit UI
+## Streamlit UI
 
 ```bash
 streamlit run ui/app.py
@@ -171,111 +247,124 @@ streamlit run ui/app.py
 
 ---
 
-## 🔄 System Flow
+# 📊 Example RAG Flow
 
-```
-User Input
-   ↓
-Prompt Selection (v1 / v2 / v3)
-   ↓
-Local LLM Call (Ollama)
-   ↓
-Raw Output
-   ↓
-JSON Extraction
-   ↓
-JSON Repair
-   ↓
-Schema Validation
-   ↓
-Retry (if needed)
-   ↓
-Final Structured Output
+## User Question
+
+```text
+What is overfitting?
 ```
 
 ---
 
-## 🔍 Prompt Versions
+## Retrieved Context
 
-| Version | Description                       |
-| ------- | --------------------------------- |
-| v1      | Basic instruction                 |
-| v2      | Few-shot prompting                |
-| v3      | Strict structured + deterministic |
-
-👉 **v3 performs best with local LLMs**
+```text
+Overfitting occurs when a model memorizes training data.
+```
 
 ---
 
-## ⚠️ Known Challenges (Local LLM)
+## Final Prompt Sent to LLM
 
-* ❗ Slow inference (CPU-bound)
-* ❗ Occasional invalid JSON
-* ❗ Truncated responses
-* ❗ Timeout issues with large models
+```text
+Retrieved Context:
+Overfitting occurs when a model memorizes training data.
 
----
-
-## 🛠️ Solutions Implemented
-
-* ✅ Retry mechanism for failed outputs
-* ✅ JSON extraction from noisy responses
-* ✅ JSON repair logic for malformed outputs
-* ✅ Schema validation for correctness
-* ✅ Timeout handling
-* ✅ Model switching support (`phi3` / `llama3`)
+<Question + Candidate Answer + Evaluation Prompt>
+```
 
 ---
 
-## ⚡ Model Comparison
-
-| Model  | Speed   | Accuracy | Recommended Use  |
-| ------ | ------- | -------- | ---------------- |
-| phi3   | ⚡ Fast | Medium   | Development      |
-| llama3 | 🐢 Slow | High     | Final evaluation |
-
----
-
-## 📊 Example Output
+# 📌 Example Output
 
 ```json
 {
-  "score": 6,
-  "strengths": ["Correct concept"],
-  "weaknesses": ["Lacks depth"],
-  "improvements": ["Add examples"],
-  "final_feedback": "Good but needs improvement"
+  "score": 8,
+  "strengths": [
+    "Correct identification of the concept"
+  ],
+  "weaknesses": [
+    "Answer lacks deeper explanation about model generalization"
+  ],
+  "improvements": [
+    "Explain why overfitting negatively impacts unseen data performance",
+    "Discuss techniques such as regularization and cross-validation"
+  ],
+  "final_feedback": "The answer demonstrates correct understanding of overfitting but would benefit from deeper explanation and practical mitigation techniques."
 }
 ```
 
 ---
 
-## 🔮 Next Steps (Future Work)
+# 🧠 Engineering Learnings
 
-* [ ] Vector Database (FAISS / Chroma)
-* [ ] RAG (Retrieval Augmented Generation)
-* [ ] Multi-LLM evaluation (generator + critic)
-* [ ] Latency benchmarking
-* [ ] Confidence scoring
+This project explores important GenAI engineering concepts:
 
----
-
-## 🧠 Key Takeaway
-
-> Moving from API-based LLMs to local models introduces real engineering challenges like reliability, latency, and output validation.
-
-This branch focuses on solving those problems.
+* Embedding generation
+* Vector similarity search
+* Retrieval pipelines
+* Prompt grounding
+* Hallucination reduction
+* Structured output validation
+* Retry mechanisms
+* Local inference systems
+* Context-aware evaluation
 
 ---
 
-## 👨‍💻 Author
+# ⚠️ Current Limitations
 
-Karthik Vas S  
-GenAI Engineer | LLM Systems | Prompt Engineering | AI Application Development
+* Small knowledge base
+* Basic line-based chunking
+* Limited metadata support
+* No reranking
+* CPU inference latency on larger models
 
 ---
 
-## 📌 Note
+# 🔮 Future Improvements
 
-👉 For API-based version, check the `main` branch
-👉 This branch focuses on **local LLM experimentation**
+* [ ] Chunk overlap strategy
+* [ ] Token-aware chunking
+* [ ] ChromaDB integration
+* [ ] Hybrid retrieval (BM25 + semantic)
+* [ ] Metadata filtering
+* [ ] Streaming responses
+* [ ] Evaluation benchmarking
+* [ ] LangChain / LlamaIndex integration
+* [ ] Multi-agent evaluation
+
+---
+
+# 🔀 Branch Evolution
+
+| Branch                 | Focus                           |
+| ---------------------- | ------------------------------- |
+| `main`                 | Prompt Engineering + Gemini API |
+| `exp/local-llm-ollama` | Local LLM integration           |
+| `exp/rag-vector-db`    | RAG + Vector Database           |
+
+---
+
+# 👨‍💻 Author
+
+Karthik Vas S
+
+GenAI Engineer | LLM Systems | RAG Pipelines | AI Application Development
+
+---
+
+# 📌 Key Takeaway
+
+This project demonstrates the evolution from:
+
+```text
+Prompt Engineering
+        ↓
+Local LLM Systems
+        ↓
+Retrieval Augmented Generation (RAG)
+```
+
+with a strong focus on understanding the internal architecture of modern GenAI systems.
