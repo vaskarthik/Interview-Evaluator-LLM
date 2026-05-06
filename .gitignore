@@ -1,3 +1,11 @@
 __pycache__/
 *.pyc
-venv/
+
+# Environment
+.env
+
+# Vector DB files
+vector_db/
+
+# Local cache
+.cache/

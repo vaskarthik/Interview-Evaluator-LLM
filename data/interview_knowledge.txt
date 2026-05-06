@@ -1,0 +1,4 @@
+Templates in C++ allow generic programming.
+Overfitting occurs when a model memorizes training data.
+Inheritance supports code reuse in object-oriented programming.
+Python is dynamically typed.
