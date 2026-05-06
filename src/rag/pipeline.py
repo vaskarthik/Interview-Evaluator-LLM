@@ -2,14 +2,16 @@ from src.rag.retriever import Retriever
 
 
 class RAGPipeline:
+
     def __init__(self):
+
         print("🔄 Initializing RAG pipeline...")
 
         self.retriever = Retriever()
 
         print("✅ RAG pipeline ready")
 
-    def build_context(self, query: str, top_k=3):
+    def build_context(self, query: str, top_k=1):
         """
         Retrieve relevant context chunks.
         """
@@ -40,12 +42,6 @@ Retrieved Context:
 {context}
 
 {base_prompt}
-
-Question:
-{question}
-
-Candidate Answer:
-{answer}
 """
 
         return rag_prompt

@@ -1,7 +1,7 @@
 import requests
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL_NAME = "llama3"  #"phi3"   # fast model for your system
+MODEL_NAME = "phi3" #"llama3"     # fast model for your system
 
 
 def call_llm(prompt: str, temperature: float = 0.0) -> str:
@@ -19,7 +19,7 @@ def call_llm(prompt: str, temperature: float = 0.0) -> str:
                 },
                 "stream": False
             },
-            timeout=60
+            timeout=180
         )
 
         result = response.json()
