@@ -1,46 +1,54 @@
-# 🧠 Interview Evaluation Bot — FastAPI RAG AI Service
+# AI Interview Evaluator — Dockerized FastAPI RAG Service
 
-## 📌 Overview
+A production-style Generative AI backend service for evaluating technical interview answers using:
 
-This project is a fully local Retrieval Augmented Generation (RAG) based interview evaluation system exposed through a production-style FastAPI backend service.
-
-Built using:
-
-* Local LLMs via Ollama
-* FastAPI REST APIs
-* Embedding models
-* FAISS Vector Database
-* Semantic Retrieval
-* Prompt Engineering
-* Structured JSON validation
-
-The system evaluates candidate interview answers using retrieved contextual knowledge and grounded LLM reasoning.
-
-This branch focuses on transforming the earlier local RAG prototype into a deployable AI backend architecture using FastAPI and modular service-oriented design.
+- Local LLM inference with Ollama
+- Retrieval Augmented Generation (RAG)
+- FAISS vector database
+- Sentence-transformers embeddings
+- FastAPI REST API
+- Dockerized deployment
+- Structured JSON evaluation responses
 
 ---
 
-# 🚀 Features
+# Repository
 
-* ✅ Fully local inference using Ollama
-* ✅ No paid API dependency
-* ✅ FastAPI backend service
-* ✅ REST API endpoint (`/evaluate`)
-* ✅ Swagger/OpenAPI documentation
-* ✅ RAG (Retrieval Augmented Generation)
-* ✅ FAISS vector database
-* ✅ Semantic search using embeddings
-* ✅ Prompt augmentation with retrieved context
-* ✅ Structured JSON evaluation output
-* ✅ Prompt versioning + score calibration
-* ✅ Startup optimized pipeline initialization
-* ✅ Schema validated API responses
-* ✅ Retry-safe malformed JSON fallback
-* ✅ CLI + Streamlit compatibility retained
+[Interview-Evaluator-LLM Repository](https://github.com/vaskarthik/Interview-Evaluator-LLM/tree/exp/dockerized-ai-service?utm_source=chatgpt.com)
 
 ---
 
-# 🧱 Project Architecture
+# Features
+
+- Local LLM inference using Ollama (`phi3`, `llama3`)
+- Semantic retrieval using FAISS
+- Embedding generation using sentence-transformers
+- Prompt augmentation using RAG
+- Structured interview evaluation
+- FastAPI REST API
+- Swagger API documentation
+- Dockerized AI backend deployment
+- JSON validation and parsing
+- Modular backend architecture
+
+---
+
+# Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend API | FastAPI |
+| LLM Runtime | Ollama |
+| LLM Models | phi3 / llama3 |
+| Embeddings | sentence-transformers |
+| Vector DB | FAISS |
+| Deployment | Docker |
+| API Docs | Swagger UI |
+| Language | Python |
+
+---
+
+# Project Architecture
 
 ```text
 Client Request
@@ -49,27 +57,32 @@ FastAPI REST API
       ↓
 RAG Pipeline
       ↓
-Embedding Generation
+Semantic Retriever
       ↓
-FAISS Vector Search
+FAISS Vector DB
       ↓
-Top-K Context Retrieval
+Retrieved Context
       ↓
 Prompt Augmentation
       ↓
-Local LLM (Ollama)
+Ollama Local LLM
       ↓
-Structured Evaluation Output
-      ↓
-JSON API Response
+Structured JSON Evaluation
 ```
 
 ---
 
-# 📂 Project Structure
+# Repository Structure
 
 ```text
 Interview-Evaluator-LLM/
+│
+├── data/
+│   └── interview_knowledge.txt
+│
+├── vector_db/
+│   ├── faiss_index.bin
+│   └── metadata.pkl
 │
 ├── src/
 │   ├── api/
@@ -78,172 +91,60 @@ Interview-Evaluator-LLM/
 │   │   ├── schemas.py
 │   │   └── services.py
 │   │
-│   ├── main.py
-│   ├── evaluator.py
-│   ├── llm_client.py
-│   │
 │   ├── rag/
 │   │   ├── embedder.py
 │   │   ├── vector_store.py
 │   │   ├── retriever.py
-│   │   ├── pipeline.py
-│   │   └── data_loader.py
-│
-├── data/
-│   ├── interview_knowledge.txt
-│   └── chunks.json
+│   │   └── pipeline.py
+│   │
+│   ├── llm_client.py
+│   └── evaluator.py
 │
 ├── vector_db/
-│
-├── prompts/
-│   ├── prompt_v1.txt
-│   ├── prompt_v2.txt
-│   └── prompt_v3.txt
-│
-├── ui/
-│   └── app.py
-│
 ├── build_vector_db.py
 ├── requirements.txt
+├── Dockerfile
+├── .dockerignore
 └── README.md
 ```
 
 ---
 
-# ⚙️ Tech Stack
+# Installation
 
-| Component       | Technology            |
-| --------------- | --------------------- |
-| Backend API     | FastAPI               |
-| API Server      | Uvicorn               |
-| Local LLM       | Ollama                |
-| Models          | phi3 / llama3         |
-| Embeddings      | sentence-transformers |
-| Embedding Model | all-MiniLM-L6-v2      |
-| Vector Database | FAISS                 |
-| UI              | Streamlit             |
-| Language        | Python                |
-
----
-
-# 🧠 Core GenAI Concepts Implemented
-
-## 1. Prompt Engineering
-
-Implemented:
-
-* Constraint-based prompting
-* Structured JSON prompting
-* Evaluation prompt versioning
-* Score calibration rules
-* Deterministic output control
-
-Example:
-
-```text
-- Score must be between 0 and 10
-- If answer is partially correct, score should be between 4 and 7
-```
-
----
-
-## 2. Retrieval Augmented Generation (RAG)
-
-The system retrieves relevant contextual knowledge before calling the LLM.
-
-Benefits:
-
-* Reduced hallucinations
-* Grounded responses
-* Better evaluation quality
-* Context-aware scoring
-
----
-
-## 3. Embeddings
-
-Text is converted into dense semantic vectors using:
-
-```text
-all-MiniLM-L6-v2
-```
-
-Example:
-
-```text
-"What is overfitting?"
-      ↓
-[0.12, -0.45, 0.88, ...]
-```
-
----
-
-## 4. Semantic Retrieval
-
-FAISS retrieves the most semantically relevant knowledge chunks using vector similarity search.
-
----
-
-## 5. Structured Output Validation
-
-The system validates:
-
-* JSON parsing
-* score ranges
-* required fields
-* malformed outputs
-
-This improves reliability of LLM responses.
-
----
-
-## 6. AI Backend Engineering
-
-Implemented:
-
-* FastAPI service architecture
-* REST API endpoints
-* Swagger/OpenAPI docs
-* Pydantic request/response schemas
-* Startup optimized pipeline loading
-* Modular service layer design
-
----
-
-# 🚀 Setup Instructions
-
-## 1. Install Ollama
-
-Download and install:
-
-👉 https://ollama.com
-
----
-
-## 2. Pull Local Models
+## Clone Repository
 
 ```bash
-ollama pull phi3
-ollama pull llama3
+git clone https://github.com/vaskarthik/Interview-Evaluator-LLM.git
+
+cd Interview-Evaluator-LLM
+
+git checkout exp/dockerized-ai-service
 ```
 
 ---
 
-## 3. Verify Ollama Running
+# Create Virtual Environment
 
 ```bash
-ollama list
+python -m venv venv
 ```
 
-Local inference server:
+### Windows
 
-```text
-http://localhost:11434
+```bash
+venv\Scripts\activate
+```
+
+### Linux / Mac
+
+```bash
+source venv/bin/activate
 ```
 
 ---
 
-# 📦 Install Python Dependencies
+# Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -251,9 +152,33 @@ pip install -r requirements.txt
 
 ---
 
-# 🧠 Build Vector Database
+# Install Ollama
 
-Before running evaluation, generate embeddings and build the FAISS vector DB:
+Download Ollama:
+
+```text
+https://ollama.com/download
+```
+
+---
+
+# Pull Local LLM Model
+
+```bash
+ollama pull phi3
+```
+
+or
+
+```bash
+ollama pull llama3
+```
+
+---
+
+# Build Vector Database
+
+Generate embeddings and build FAISS vector DB:
 
 ```bash
 python build_vector_db.py
@@ -263,13 +188,13 @@ This creates:
 
 ```text
 vector_db/
-   ├── faiss_index.bin
-   └── metadata.pkl
+├── faiss_index.bin
+└── metadata.pkl
 ```
 
 ---
 
-# ▶️ Run FastAPI Service
+# Run FastAPI Service (Without Docker)
 
 ```bash
 uvicorn src.api.main:app --reload
@@ -277,7 +202,7 @@ uvicorn src.api.main:app --reload
 
 ---
 
-# 📘 Swagger API Docs
+# Swagger API Docs
 
 Open:
 
@@ -287,130 +212,134 @@ http://127.0.0.1:8000/docs
 
 ---
 
-# 📡 API Endpoint
+# API Endpoint
 
 ## POST `/evaluate`
 
-### Example Request
+### Request
 
 ```json
 {
-  "question": "What is overfitting?",
-  "candidate_answer": "Overfitting happens when model memorizes training data."
+  "question": "What is a template?",
+  "candidate_answer": "Template is a reusable piece of code independent of datatype."
 }
 ```
 
 ---
 
-### Example Response
+### Response
 
 ```json
 {
-  "score": 7,
+  "score": 5,
   "strengths": [
-    "Correctly identified memorization issue"
+    "Correct identification that templates are related to data types"
   ],
   "weaknesses": [
-    "Did not explain generalization failure"
+    "Lacked depth in explaining the concept"
   ],
   "improvements": [
-    "Mention unseen test data performance"
+    "Explain generic programming and template behavior."
   ],
-  "final_feedback": "Good basic understanding but answer lacks deeper explanation.",
-  "model": "phi3"
+  "final_feedback": "The answer is partially correct but lacks technical depth."
 }
 ```
 
 ---
 
-# 📊 Example RAG Flow
+# Dockerized Deployment
 
-## User Question
+## Build Docker Image
 
-```text
-What is a template in C++?
+```bash
+docker build -t interview-evaluator-ai .
 ```
 
 ---
 
-## Retrieved Context
+## Run Docker Container
 
-```text
-Templates in C++ allow generic programming.
+```bash
+docker run -p 8000:8000 interview-evaluator-ai
 ```
 
 ---
 
-## Final Prompt Sent to LLM
+# Important Docker Networking Note
 
-```text
-Retrieved Context:
-Templates in C++ allow generic programming.
+Inside Docker, `localhost` refers to the container itself.
 
-<Question + Candidate Answer + Evaluation Prompt>
+For Ollama communication from container → host machine:
+
+```python
+OLLAMA_URL = "http://host.docker.internal:11434/api/generate"
 ```
 
 ---
 
-# 🧠 Engineering Learnings
+# Example Evaluation Flow
 
-This project explores important GenAI engineering concepts:
-
-* FastAPI backend serving
-* Embedding generation
-* Vector similarity search
-* Retrieval pipelines
-* Prompt grounding
-* Hallucination reduction
-* Structured output validation
-* Schema enforcement
-* Local inference systems
-* Context-aware evaluation
-* AI backend architecture
-
----
-
-# ⚠️ Current Limitations
-
-* Small knowledge base
-* Basic line-based chunking
-* Limited metadata support
-* No reranking
-* No streaming responses yet
-* CPU inference latency on larger models
+```text
+Question
+   ↓
+Semantic Retrieval
+   ↓
+Relevant Context
+   ↓
+Prompt Augmentation
+   ↓
+LLM Evaluation
+   ↓
+Structured JSON Output
+```
 
 ---
 
-# 🔮 Future Improvements
+# Current Capabilities
 
-* [ ] Dockerization
-* [ ] Docker Compose integration
-* [ ] Streaming responses
-* [ ] Async FastAPI inference
-* [ ] Retry logic for malformed JSON
-* [ ] Logging infrastructure
-* [ ] LangChain / LlamaIndex integration
-* [ ] Hybrid retrieval (BM25 + semantic)
-* [ ] Multi-agent evaluation
+- RAG-based answer evaluation
+- Semantic search
+- Local AI inference
+- Dockerized deployment
+- REST API serving
+- Structured evaluation responses
+
+---
+
+# Future Improvements
+
+- Streaming LLM responses
+- LangChain integration
+- Multi-agent evaluation
+- Authentication and API keys
+- Cloud deployment
+- Kubernetes deployment
+- Conversation memory
+- Advanced prompt versioning
 
 ---
 
 # 🔀 Branch Evolution
 
-| Branch                       | Focus                                |
-| ---------------------------- | ------------------------------------ |
-| `main`                       | Prompt Engineering + Gemini API      |
-| `exp/local-llm-ollama`       | Local LLM integration                |
-| `exp/rag-vector-db`          | RAG + Vector Database                |
-| `exp/fastapi-ai-service`     | FastAPI AI Backend Service           |
+| Branch | Focus |
+|---|---|
+| `main` | Prompt Engineering + Gemini API |
+| `exp/local-llm-ollama` | Local LLM Integration |
+| `exp/rag-vector-db` | RAG + Vector Database |
+| `exp/fastapi-ai-service` | FastAPI AI Backend Service |
+| `exp/dockerized-ai-service` | Dockerized AI Deployment |
 
 ---
 
 # 👨‍💻 Author
 
-Karthik Vas S
+## Karthik Vas S
 
 GenAI Engineer | LLM Systems | RAG Pipelines | AI Backend Engineering
+
+GitHub:
+
+[Karthik Vas GitHub](https://github.com/vaskarthik/Interview-Evaluator-LLM/tree/exp/dockerized-ai-service)
 
 ---
 
@@ -425,7 +354,33 @@ Local LLM Systems
         ↓
 Retrieval Augmented Generation (RAG)
         ↓
-Production-Style AI Backend Service
+FastAPI AI Backend
+        ↓
+Dockerized Production-Style AI Service
 ```
 
-with a strong focus on understanding the internal architecture and deployment patterns of modern GenAI systems.
+with a strong focus on:
+- understanding internal GenAI architecture
+- backend AI engineering
+- deployment workflows
+- containerized inference systems
+- modern RAG pipeline implementation
+- production-oriented AI application design
+
+---
+
+# Learning Outcomes
+
+This project demonstrates practical experience with:
+
+- Generative AI backend engineering
+- RAG architecture
+- Semantic retrieval systems
+- FastAPI backend development
+- Docker containerization
+- Local LLM inference
+- AI deployment workflows
+- Structured prompt engineering
+- Vector database integration
+- AI infrastructure debugging
+- Container networking concepts
