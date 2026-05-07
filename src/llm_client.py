@@ -1,6 +1,8 @@
 import requests
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
+
+#OLLAMA_URL = "http://localhost:11434/api/generate" (OLD for RAG and FASTAPI)
+OLLAMA_URL = "http://host.docker.internal:11434/api/generate" #(For DOCKER)
 MODEL_NAME = "phi3" #"llama3"     # fast model for your system
 
 
