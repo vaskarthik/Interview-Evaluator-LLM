@@ -9,6 +9,6 @@ def evaluate_question(
     return evaluate_answer(
         question=question,
         answer=candidate_answer,
-        prompt_version="v1",
+        prompt_version="v3",
         temperature=0.0
     )

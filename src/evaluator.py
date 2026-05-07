@@ -7,16 +7,14 @@ import json
 import re
 from pathlib import Path
 
-from src.rag.pipeline import RAGPipeline
 from src.langchain.chains import evaluation_chain
+from src.langchain.retriever import retriever
 
 # -------------------------------------------------------------------------
 # RAG Configuration
 # -------------------------------------------------------------------------
 
 USE_RAG = True
-
-rag_pipeline = RAGPipeline()
 
 # -------------------------------------------------------------------------
 # Paths
@@ -123,25 +121,36 @@ def evaluate_answer(
     base_prompt = load_prompt(prompt_version)
 
     # -------------------------------------------------------------
-    # Base Prompt
-    # -------------------------------------------------------------
-
-    final_prompt = (
-        base_prompt
-        .replace("{question}", question)
-        .replace("{answer}", answer)
-    )
-
-    # -------------------------------------------------------------
-    # Apply RAG Augmentation
+    # RAG Retrieval + Prompt Augmentation
     # -------------------------------------------------------------
 
     if USE_RAG:
 
-        final_prompt = rag_pipeline.augment_prompt(
-            question,
-            answer,
-            final_prompt
+        docs = retriever.invoke(question)
+
+        retrieved_context = "\n".join(
+            [doc.page_content for doc in docs]
+        )
+
+        final_prompt = f"""
+{base_prompt}
+
+RETRIEVED CONTEXT:
+{retrieved_context}
+
+INPUT:
+Question: {question}
+
+Candidate Answer:
+{answer}
+"""
+
+    else:
+
+        final_prompt = (
+            base_prompt
+            .replace("{question}", question)
+            .replace("{answer}", answer)
         )
 
     # -------------------------------------------------------------

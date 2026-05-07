@@ -1,11 +1,12 @@
-# AI Interview Evaluator — Dockerized FastAPI RAG Service
+# AI Interview Evaluator — LangChain Orchestrated RAG Service
 
 A production-style Generative AI backend service for evaluating technical interview answers using:
 
 - Local LLM inference with Ollama
 - Retrieval Augmented Generation (RAG)
 - FAISS vector database
-- Sentence-transformers embeddings
+- LangChain orchestration
+- Retriever abstraction
 - FastAPI REST API
 - Dockerized deployment
 - Structured JSON evaluation responses
@@ -14,7 +15,7 @@ A production-style Generative AI backend service for evaluating technical interv
 
 # Repository
 
-[Interview-Evaluator-LLM Repository](https://github.com/vaskarthik/Interview-Evaluator-LLM/tree/exp/dockerized-ai-service?utm_source=chatgpt.com)
+[Interview-Evaluator-LLM Repository](https://github.com/vaskarthik/Interview-Evaluator-LLM/tree/exp/langchain-ai-orchestration?utm_source=chatgpt.com)
 
 ---
 
@@ -24,11 +25,13 @@ A production-style Generative AI backend service for evaluating technical interv
 - Semantic retrieval using FAISS
 - Embedding generation using sentence-transformers
 - Prompt augmentation using RAG
-- Structured interview evaluation
+- LangChain PromptTemplate integration
+- RunnableSequence orchestration (LCEL)
+- Retriever abstraction using `.as_retriever()`
+- Structured JSON parsing using JsonOutputParser
 - FastAPI REST API
 - Swagger API documentation
 - Dockerized AI backend deployment
-- JSON validation and parsing
 - Modular backend architecture
 
 ---
@@ -40,8 +43,10 @@ A production-style Generative AI backend service for evaluating technical interv
 | Backend API | FastAPI |
 | LLM Runtime | Ollama |
 | LLM Models | phi3 / llama3 |
+| Orchestration | LangChain |
 | Embeddings | sentence-transformers |
 | Vector DB | FAISS |
+| Retrieval | LangChain Retriever |
 | Deployment | Docker |
 | API Docs | Swagger UI |
 | Language | Python |
@@ -55,9 +60,9 @@ Client Request
       ↓
 FastAPI REST API
       ↓
-RAG Pipeline
+LangChain Evaluation Chain
       ↓
-Semantic Retriever
+Retriever Abstraction
       ↓
 FAISS Vector DB
       ↓
@@ -65,10 +70,47 @@ Retrieved Context
       ↓
 Prompt Augmentation
       ↓
-Ollama Local LLM
+PromptTemplate
+      ↓
+OllamaLLM
+      ↓
+JsonOutputParser
       ↓
 Structured JSON Evaluation
+
+# LangChain Concepts Implemented
+
+## PromptTemplate
+
+Reusable prompt abstraction for structured evaluation prompts.
+
+---
+
+## RunnableSequence (LCEL)
+
+LangChain Expression Language orchestration:
+
+```python
+prompt | llm | parser
 ```
+
+---
+
+## Retriever Abstraction
+
+Using:
+
+```python
+retriever.invoke(question)
+```
+
+instead of manual retrieval orchestration.
+
+---
+
+## JsonOutputParser
+
+Structured JSON parsing and validation from LLM outputs.
 
 ---
 
@@ -79,6 +121,11 @@ Interview-Evaluator-LLM/
 │
 ├── data/
 │   └── interview_knowledge.txt
+│
+├── prompts/
+│   ├── prompt_v1.txt
+│   ├── prompt_v2.txt
+│   └── prompt_v3.txt
 │
 ├── vector_db/
 │   ├── faiss_index.bin
@@ -91,16 +138,22 @@ Interview-Evaluator-LLM/
 │   │   ├── schemas.py
 │   │   └── services.py
 │   │
+│   ├── langchain/
+│   │   ├── prompts.py
+│   │   ├── llm.py
+│   │   ├── output_parser.py
+│   │   ├── chains.py
+│   │   └── retriever.py
+│   │
 │   ├── rag/
+│   │   ├── data_loader.py
 │   │   ├── embedder.py
 │   │   ├── vector_store.py
-│   │   ├── retriever.py
-│   │   └── pipeline.py
+│   │   └── retriever.py
 │   │
-│   ├── llm_client.py
-│   └── evaluator.py
+│   ├── evaluator.py
+│   └── main.py
 │
-├── vector_db/
 ├── build_vector_db.py
 ├── requirements.txt
 ├── Dockerfile
@@ -119,7 +172,7 @@ git clone https://github.com/vaskarthik/Interview-Evaluator-LLM.git
 
 cd Interview-Evaluator-LLM
 
-git checkout exp/dockerized-ai-service
+git checkout exp/langchain-ai-orchestration
 ```
 
 ---
@@ -176,6 +229,14 @@ ollama pull llama3
 
 ---
 
+# Start Ollama
+
+```bash
+ollama serve
+```
+
+---
+
 # Build Vector Database
 
 Generate embeddings and build FAISS vector DB:
@@ -194,7 +255,7 @@ vector_db/
 
 ---
 
-# Run FastAPI Service (Without Docker)
+# Run FastAPI Service
 
 ```bash
 uvicorn src.api.main:app --reload
@@ -221,7 +282,7 @@ http://127.0.0.1:8000/docs
 ```json
 {
   "question": "What is a template?",
-  "candidate_answer": "Template is a reusable piece of code independent of datatype."
+  "candidate_answer": "Template is reusable generic code independent of datatype."
 }
 ```
 
@@ -231,17 +292,17 @@ http://127.0.0.1:8000/docs
 
 ```json
 {
-  "score": 5,
+  "score": 7,
   "strengths": [
-    "Correct identification that templates are related to data types"
+    "Correct understanding of generic reusable code"
   ],
   "weaknesses": [
-    "Lacked depth in explaining the concept"
+    "Lacks deeper explanation of template instantiation"
   ],
   "improvements": [
-    "Explain generic programming and template behavior."
+    "Explain generic programming and template behavior in C++"
   ],
-  "final_feedback": "The answer is partially correct but lacks technical depth."
+  "final_feedback": "The answer demonstrates basic understanding but requires more technical depth."
 }
 ```
 
@@ -272,7 +333,7 @@ Inside Docker, `localhost` refers to the container itself.
 For Ollama communication from container → host machine:
 
 ```python
-OLLAMA_URL = "http://host.docker.internal:11434/api/generate"
+OLLAMA_BASE_URL = "http://host.docker.internal:11434"
 ```
 
 ---
@@ -282,13 +343,15 @@ OLLAMA_URL = "http://host.docker.internal:11434/api/generate"
 ```text
 Question
    ↓
-Semantic Retrieval
+Retriever.invoke()
    ↓
 Relevant Context
    ↓
 Prompt Augmentation
    ↓
-LLM Evaluation
+LangChain Chain
+   ↓
+OllamaLLM
    ↓
 Structured JSON Output
 ```
@@ -298,7 +361,9 @@ Structured JSON Output
 # Current Capabilities
 
 - RAG-based answer evaluation
-- Semantic search
+- Semantic retrieval
+- LangChain orchestration
+- Retriever abstraction
 - Local AI inference
 - Dockerized deployment
 - REST API serving
@@ -308,14 +373,16 @@ Structured JSON Output
 
 # Future Improvements
 
-- Streaming LLM responses
-- LangChain integration
+- AI agents
+- Tool calling
 - Multi-agent evaluation
+- LangGraph workflows
+- Conversation memory
+- Candidate progress tracking
+- Streaming LLM responses
 - Authentication and API keys
 - Cloud deployment
 - Kubernetes deployment
-- Conversation memory
-- Advanced prompt versioning
 
 ---
 
@@ -328,6 +395,7 @@ Structured JSON Output
 | `exp/rag-vector-db` | RAG + Vector Database |
 | `exp/fastapi-ai-service` | FastAPI AI Backend Service |
 | `exp/dockerized-ai-service` | Dockerized AI Deployment |
+| `exp/langchain-ai-orchestration` | LangChain Orchestration + Retriever Abstraction |
 
 ---
 
@@ -339,7 +407,7 @@ GenAI Engineer | LLM Systems | RAG Pipelines | AI Backend Engineering
 
 GitHub:
 
-[Karthik Vas GitHub](https://github.com/vaskarthik/Interview-Evaluator-LLM/tree/exp/dockerized-ai-service)
+Karthik Vas GitHub Repository
 
 ---
 
@@ -356,12 +424,19 @@ Retrieval Augmented Generation (RAG)
         ↓
 FastAPI AI Backend
         ↓
-Dockerized Production-Style AI Service
+Dockerized AI Service
+        ↓
+LangChain Orchestration
+        ↓
+Retriever Abstraction
 ```
 
 with a strong focus on:
+
 - understanding internal GenAI architecture
 - backend AI engineering
+- orchestration systems
+- retrieval abstraction
 - deployment workflows
 - containerized inference systems
 - modern RAG pipeline implementation
@@ -374,6 +449,9 @@ with a strong focus on:
 This project demonstrates practical experience with:
 
 - Generative AI backend engineering
+- LangChain orchestration
+- LCEL (LangChain Expression Language)
+- Retriever abstraction
 - RAG architecture
 - Semantic retrieval systems
 - FastAPI backend development
