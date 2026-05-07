@@ -7,8 +7,8 @@ import json
 import re
 from pathlib import Path
 
-from src.llm_client import call_llm
 from src.rag.pipeline import RAGPipeline
+from src.langchain.chains import evaluation_chain
 
 # -------------------------------------------------------------------------
 # RAG Configuration
@@ -18,7 +18,6 @@ USE_RAG = True
 
 rag_pipeline = RAGPipeline()
 
-
 # -------------------------------------------------------------------------
 # Paths
 # -------------------------------------------------------------------------
@@ -26,12 +25,12 @@ rag_pipeline = RAGPipeline()
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROMPT_PATH = BASE_DIR / "prompts"
 
-
 # -------------------------------------------------------------------------
 # Load Prompt File
 # -------------------------------------------------------------------------
 
 def load_prompt(version: str) -> str:
+
     file_map = {
         "v1": "prompt_v1.txt",
         "v2": "prompt_v2.txt",
@@ -41,26 +40,27 @@ def load_prompt(version: str) -> str:
     with open(PROMPT_PATH / file_map[version], "r", encoding="utf-8") as f:
         return f.read()
 
-
 # -------------------------------------------------------------------------
 # Extract JSON Block From LLM Output
 # -------------------------------------------------------------------------
 
 def extract_json(text: str) -> str:
+
     matches = re.findall(r'\{[\s\S]*?\}', text, re.DOTALL)
 
     return matches[-1] if matches else text
-
 
 # -------------------------------------------------------------------------
 # Repair + Parse JSON
 # -------------------------------------------------------------------------
 
 def safe_json_load(text: str):
+
     try:
         return json.loads(text)
 
     except Exception:
+
         text = text.replace("\n", " ")
 
         # Fix common malformed JSON issues
@@ -74,7 +74,6 @@ def safe_json_load(text: str):
 
         except Exception:
             return None
-
 
 # -------------------------------------------------------------------------
 # Validate Expected Schema
@@ -110,46 +109,6 @@ def is_valid_evaluation(parsed: dict) -> bool:
 
     return True
 
-
-# -------------------------------------------------------------------------
-# Retry Logic For LLM Calls
-# -------------------------------------------------------------------------
-
-def call_with_retry(
-    prompt: str,
-    temperature: float,
-    retries: int = 2
-):
-    last_response = ""
-
-    for attempt in range(retries):
-
-        print(f"\n🔄 LLM attempt {attempt + 1}")
-
-        response = call_llm(prompt, temperature)
-
-        last_response = response
-
-        print("\n📦 Raw LLM output:")
-        print(response[:300])
-
-        cleaned = extract_json(response)
-
-        parsed = safe_json_load(cleaned)
-
-        if parsed and is_valid_evaluation(parsed):
-            print("\n✅ Valid evaluation JSON received")
-
-            return parsed
-
-        print("\n⚠️ Invalid or incomplete JSON, retrying...")
-
-    return {
-        "error": "Invalid JSON from LLM",
-        "raw_output": last_response
-    }
-
-
 # -------------------------------------------------------------------------
 # Main Evaluation Function
 # -------------------------------------------------------------------------
@@ -157,7 +116,7 @@ def call_with_retry(
 def evaluate_answer(
     question: str,
     answer: str,
-    prompt_version: str = "v1",
+    prompt_version: str = "v3",
     temperature: float = 0.0
 ):
 
@@ -198,13 +157,38 @@ def evaluate_answer(
     print("\n==================================================\n")
 
     # -------------------------------------------------------------
-    # LLM Call + Retry
+    # LangChain Evaluation
     # -------------------------------------------------------------
 
-    parsed = call_with_retry(final_prompt, temperature)
+    try:
 
-    if "error" in parsed:
-        return parsed
+        parsed = evaluation_chain.invoke({
+            "final_prompt": final_prompt
+        })
+
+    except Exception as e:
+
+        return {
+            "error": "LangChain evaluation failed",
+            "details": str(e)
+        }
+
+    # -------------------------------------------------------------
+    # Validate Output
+    # -------------------------------------------------------------
+
+    if not parsed:
+
+        return {
+            "error": "Empty response from LangChain pipeline"
+        }
+
+    if not is_valid_evaluation(parsed):
+
+        return {
+            "error": "Invalid evaluation schema returned",
+            "raw_output": parsed
+        }
 
     # -------------------------------------------------------------
     # Normalize Score
@@ -213,11 +197,13 @@ def evaluate_answer(
     if isinstance(parsed.get("score"), str):
 
         try:
+
             parsed["score"] = int(
                 parsed["score"].split("/")[0]
             )
 
         except Exception:
+
             parsed["score"] = None
 
     # -------------------------------------------------------------
@@ -231,7 +217,6 @@ def evaluate_answer(
 
     return parsed
 
-
 # -------------------------------------------------------------------------
 # Compare Prompt Versions
 # -------------------------------------------------------------------------
@@ -243,6 +228,7 @@ def compare_prompt_versions(question: str, answer: str):
     for version in ["v1", "v2", "v3"]:
 
         results[version] = {
+
             "temp_0": evaluate_answer(
                 question,
                 answer,
@@ -259,4 +245,3 @@ def compare_prompt_versions(question: str, answer: str):
         }
 
     return results
-

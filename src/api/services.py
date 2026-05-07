@@ -1,4 +1,4 @@
-from src.rag.pipeline import run_rag_pipeline
+from src.evaluator import evaluate_answer
 
 
 def evaluate_question(
@@ -6,11 +6,9 @@ def evaluate_question(
     candidate_answer: str
 ):
 
-    result = run_rag_pipeline(
+    return evaluate_answer(
         question=question,
-        candidate_answer=candidate_answer
+        answer=candidate_answer,
+        prompt_version="v1",
+        temperature=0.0
     )
-
-    result["model"] = "phi3"
-
-    return result

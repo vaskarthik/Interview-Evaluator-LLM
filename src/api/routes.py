@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
 from src.api.schemas import (
-    EvaluateRequest,
-    EvaluateResponse
+    EvaluationRequest,
+    EvaluationResponse
 )
 
 from src.api.services import evaluate_question
@@ -13,9 +13,9 @@ router = APIRouter()
 
 @router.post(
     "/evaluate",
-    response_model=EvaluateResponse
+    response_model=EvaluationResponse
 )
-def evaluate(request: EvaluateRequest):
+def evaluate(request: EvaluationRequest):
 
     result = evaluate_question(
         question=request.question,
