@@ -1,10 +1,13 @@
-# 🧠 Interview Evaluation Bot — Local RAG System
+# 🧠 Interview Evaluation Bot — FastAPI RAG AI Service
 
 ## 📌 Overview
 
-This project is a fully local Retrieval Augmented Generation (RAG) based interview evaluation system built using:
+This project is a fully local Retrieval Augmented Generation (RAG) based interview evaluation system exposed through a production-style FastAPI backend service.
+
+Built using:
 
 * Local LLMs via Ollama
+* FastAPI REST APIs
 * Embedding models
 * FAISS Vector Database
 * Semantic Retrieval
@@ -13,7 +16,7 @@ This project is a fully local Retrieval Augmented Generation (RAG) based intervi
 
 The system evaluates candidate interview answers using retrieved contextual knowledge and grounded LLM reasoning.
 
-This branch focuses on understanding and implementing the internal architecture of modern GenAI systems rather than relying only on hosted APIs.
+This branch focuses on transforming the earlier local RAG prototype into a deployable AI backend architecture using FastAPI and modular service-oriented design.
 
 ---
 
@@ -21,23 +24,30 @@ This branch focuses on understanding and implementing the internal architecture 
 
 * ✅ Fully local inference using Ollama
 * ✅ No paid API dependency
+* ✅ FastAPI backend service
+* ✅ REST API endpoint (`/evaluate`)
+* ✅ Swagger/OpenAPI documentation
 * ✅ RAG (Retrieval Augmented Generation)
 * ✅ FAISS vector database
 * ✅ Semantic search using embeddings
 * ✅ Prompt augmentation with retrieved context
-* ✅ Structured JSON output validation
-* ✅ Retry + malformed JSON handling
-* ✅ Prompt versioning (`v1`, `v2`, `v3`)
-* ✅ Temperature experimentation
-* ✅ CLI-based evaluation
-* ✅ Streamlit UI support
+* ✅ Structured JSON evaluation output
+* ✅ Prompt versioning + score calibration
+* ✅ Startup optimized pipeline initialization
+* ✅ Schema validated API responses
+* ✅ Retry-safe malformed JSON fallback
+* ✅ CLI + Streamlit compatibility retained
 
 ---
 
 # 🧱 Project Architecture
 
 ```text
-User Question
+Client Request
+      ↓
+FastAPI REST API
+      ↓
+RAG Pipeline
       ↓
 Embedding Generation
       ↓
@@ -50,6 +60,8 @@ Prompt Augmentation
 Local LLM (Ollama)
       ↓
 Structured Evaluation Output
+      ↓
+JSON API Response
 ```
 
 ---
@@ -60,6 +72,12 @@ Structured Evaluation Output
 Interview-Evaluator-LLM/
 │
 ├── src/
+│   ├── api/
+│   │   ├── main.py
+│   │   ├── routes.py
+│   │   ├── schemas.py
+│   │   └── services.py
+│   │
 │   ├── main.py
 │   ├── evaluator.py
 │   ├── llm_client.py
@@ -96,6 +114,8 @@ Interview-Evaluator-LLM/
 
 | Component       | Technology            |
 | --------------- | --------------------- |
+| Backend API     | FastAPI               |
+| API Server      | Uvicorn               |
 | Local LLM       | Ollama                |
 | Models          | phi3 / llama3         |
 | Embeddings      | sentence-transformers |
@@ -112,10 +132,18 @@ Interview-Evaluator-LLM/
 
 Implemented:
 
-* Zero-shot prompting
-* Few-shot prompting
 * Constraint-based prompting
-* Structured output prompting
+* Structured JSON prompting
+* Evaluation prompt versioning
+* Score calibration rules
+* Deterministic output control
+
+Example:
+
+```text
+- Score must be between 0 and 10
+- If answer is partially correct, score should be between 4 and 7
+```
 
 ---
 
@@ -128,6 +156,7 @@ Benefits:
 * Reduced hallucinations
 * Grounded responses
 * Better evaluation quality
+* Context-aware scoring
 
 ---
 
@@ -159,12 +188,25 @@ FAISS retrieves the most semantically relevant knowledge chunks using vector sim
 
 The system validates:
 
-* JSON schema
+* JSON parsing
 * score ranges
 * required fields
-* empty outputs
+* malformed outputs
 
 This improves reliability of LLM responses.
+
+---
+
+## 6. AI Backend Engineering
+
+Implemented:
+
+* FastAPI service architecture
+* REST API endpoints
+* Swagger/OpenAPI docs
+* Pydantic request/response schemas
+* Startup optimized pipeline loading
+* Modular service layer design
 
 ---
 
@@ -187,15 +229,13 @@ ollama pull llama3
 
 ---
 
-## 3. Start Local Model
-
-Recommended for most laptops:
+## 3. Verify Ollama Running
 
 ```bash
-ollama run phi3
+ollama list
 ```
 
-This starts the local inference server:
+Local inference server:
 
 ```text
 http://localhost:11434
@@ -229,20 +269,56 @@ vector_db/
 
 ---
 
-# ▶️ Run Application
-
-## CLI Mode
+# ▶️ Run FastAPI Service
 
 ```bash
-python src/main.py
+uvicorn src.api.main:app --reload
 ```
 
 ---
 
-## Streamlit UI
+# 📘 Swagger API Docs
 
-```bash
-streamlit run ui/app.py
+Open:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+---
+
+# 📡 API Endpoint
+
+## POST `/evaluate`
+
+### Example Request
+
+```json
+{
+  "question": "What is overfitting?",
+  "candidate_answer": "Overfitting happens when model memorizes training data."
+}
+```
+
+---
+
+### Example Response
+
+```json
+{
+  "score": 7,
+  "strengths": [
+    "Correctly identified memorization issue"
+  ],
+  "weaknesses": [
+    "Did not explain generalization failure"
+  ],
+  "improvements": [
+    "Mention unseen test data performance"
+  ],
+  "final_feedback": "Good basic understanding but answer lacks deeper explanation.",
+  "model": "phi3"
+}
 ```
 
 ---
@@ -252,7 +328,7 @@ streamlit run ui/app.py
 ## User Question
 
 ```text
-What is overfitting?
+What is a template in C++?
 ```
 
 ---
@@ -260,7 +336,7 @@ What is overfitting?
 ## Retrieved Context
 
 ```text
-Overfitting occurs when a model memorizes training data.
+Templates in C++ allow generic programming.
 ```
 
 ---
@@ -269,30 +345,9 @@ Overfitting occurs when a model memorizes training data.
 
 ```text
 Retrieved Context:
-Overfitting occurs when a model memorizes training data.
+Templates in C++ allow generic programming.
 
 <Question + Candidate Answer + Evaluation Prompt>
-```
-
----
-
-# 📌 Example Output
-
-```json
-{
-  "score": 8,
-  "strengths": [
-    "Correct identification of the concept"
-  ],
-  "weaknesses": [
-    "Answer lacks deeper explanation about model generalization"
-  ],
-  "improvements": [
-    "Explain why overfitting negatively impacts unseen data performance",
-    "Discuss techniques such as regularization and cross-validation"
-  ],
-  "final_feedback": "The answer demonstrates correct understanding of overfitting but would benefit from deeper explanation and practical mitigation techniques."
-}
 ```
 
 ---
@@ -301,15 +356,17 @@ Overfitting occurs when a model memorizes training data.
 
 This project explores important GenAI engineering concepts:
 
+* FastAPI backend serving
 * Embedding generation
 * Vector similarity search
 * Retrieval pipelines
 * Prompt grounding
 * Hallucination reduction
 * Structured output validation
-* Retry mechanisms
+* Schema enforcement
 * Local inference systems
 * Context-aware evaluation
+* AI backend architecture
 
 ---
 
@@ -319,31 +376,33 @@ This project explores important GenAI engineering concepts:
 * Basic line-based chunking
 * Limited metadata support
 * No reranking
+* No streaming responses yet
 * CPU inference latency on larger models
 
 ---
 
 # 🔮 Future Improvements
 
-* [ ] Chunk overlap strategy
-* [ ] Token-aware chunking
-* [ ] ChromaDB integration
-* [ ] Hybrid retrieval (BM25 + semantic)
-* [ ] Metadata filtering
+* [ ] Dockerization
+* [ ] Docker Compose integration
 * [ ] Streaming responses
-* [ ] Evaluation benchmarking
+* [ ] Async FastAPI inference
+* [ ] Retry logic for malformed JSON
+* [ ] Logging infrastructure
 * [ ] LangChain / LlamaIndex integration
+* [ ] Hybrid retrieval (BM25 + semantic)
 * [ ] Multi-agent evaluation
 
 ---
 
 # 🔀 Branch Evolution
 
-| Branch                 | Focus                           |
-| ---------------------- | ------------------------------- |
-| `main`                 | Prompt Engineering + Gemini API |
-| `exp/local-llm-ollama` | Local LLM integration           |
-| `exp/rag-vector-db`    | RAG + Vector Database           |
+| Branch                       | Focus                                |
+| ---------------------------- | ------------------------------------ |
+| `main`                       | Prompt Engineering + Gemini API      |
+| `exp/local-llm-ollama`       | Local LLM integration                |
+| `exp/rag-vector-db`          | RAG + Vector Database                |
+| `exp/fastapi-ai-service`     | FastAPI AI Backend Service           |
 
 ---
 
@@ -351,7 +410,7 @@ This project explores important GenAI engineering concepts:
 
 Karthik Vas S
 
-GenAI Engineer | LLM Systems | RAG Pipelines | AI Application Development
+GenAI Engineer | LLM Systems | RAG Pipelines | AI Backend Engineering
 
 ---
 
@@ -365,6 +424,8 @@ Prompt Engineering
 Local LLM Systems
         ↓
 Retrieval Augmented Generation (RAG)
+        ↓
+Production-Style AI Backend Service
 ```
 
-with a strong focus on understanding the internal architecture of modern GenAI systems.
+with a strong focus on understanding the internal architecture and deployment patterns of modern GenAI systems.
