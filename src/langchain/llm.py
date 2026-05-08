@@ -1,7 +1,11 @@
-from langchain_ollama import OllamaLLM
+from langchain_ollama import ChatOllama
 
-llm = OllamaLLM(
-    model="phi3",
-    base_url="http://localhost:11434",
-    temperature=0
+
+# -------------------------------------------------------------------------
+# Local Ollama Chat Model
+# -------------------------------------------------------------------------
+
+llm = ChatOllama(
+    model="llama3",
+    temperature=0,
 )
