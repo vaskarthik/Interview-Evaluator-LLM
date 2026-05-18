@@ -1,16 +1,24 @@
 from src.agents.agent import agent_executor
 
 
-response = agent_executor.run(
-    question="What is polymorphism in OOP?",
+def main():
 
-    answer="""
-Polymorphism allows methods
-to behave differently based on objects.
-"""
-)
+    question = "What is polymorphism in C++?"
+
+    answer = """
+    Polymorphism allows objects to behave differently
+    based on the method implementation.
+    """
+
+    result = agent_executor.run(
+        question=question,
+        answer=answer,
+    )
+
+    print("\n========== FINAL RESULT ==========\n")
+
+    print(result)
 
 
-print("\n\n=== FINAL RESPONSE ===\n")
-
-print(response)
+if __name__ == "__main__":
+    main()
