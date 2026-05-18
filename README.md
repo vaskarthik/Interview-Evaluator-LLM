@@ -1,37 +1,49 @@
-# AI Interview Evaluator — LangChain Orchestrated RAG Service
+# AI Interview Evaluator — Modular RAG + Workflow Orchestrated GenAI System
 
-A production-style Generative AI backend service for evaluating technical interview answers using:
+A production-style Generative AI application for evaluating technical interview answers using:
 
 - Local LLM inference with Ollama
 - Retrieval Augmented Generation (RAG)
 - FAISS vector database
 - LangChain orchestration
-- Retriever abstraction
-- FastAPI REST API
-- Dockerized deployment
-- Structured JSON evaluation responses
+- Workflow-based agent architecture
+- FastAPI backend service
+- Streamlit frontend UI
+- Structured evaluation output pipelines
 
 ---
 
-# Repository
+# Overview
 
-[Interview-Evaluator-LLM Repository](https://github.com/vaskarthik/Interview-Evaluator-LLM/tree/exp/langchain-ai-orchestration?utm_source=chatgpt.com)
+This project demonstrates the evolution from simple prompt engineering into a modular AI application architecture focused on:
+
+- LLM application engineering
+- RAG systems
+- workflow orchestration
+- retrieval abstraction
+- local AI inference
+- backend AI services
+- structured AI outputs
+
+The system evaluates candidate answers for technical interview questions by retrieving relevant knowledge context and generating grounded evaluation feedback using a local LLM.
 
 ---
 
-# Features
+# Key Features
 
-- Local LLM inference using Ollama (`phi3`, `llama3`)
+- Local LLM inference using Ollama
+- llama3 integration
+- RAG-based evaluation pipeline
 - Semantic retrieval using FAISS
-- Embedding generation using sentence-transformers
-- Prompt augmentation using RAG
+- sentence-transformers embeddings
 - LangChain PromptTemplate integration
-- RunnableSequence orchestration (LCEL)
-- Retriever abstraction using `.as_retriever()`
-- Structured JSON parsing using JsonOutputParser
+- Reusable LangChain chains
+- Tool abstraction using `@tool`
+- Workflow orchestration layer
+- Agent controller abstraction
 - FastAPI REST API
-- Swagger API documentation
-- Dockerized AI backend deployment
+- Streamlit UI
+- Structured evaluation output parsing
 - Modular backend architecture
 
 ---
@@ -40,59 +52,103 @@ A production-style Generative AI backend service for evaluating technical interv
 
 | Layer | Technology |
 |---|---|
-| Backend API | FastAPI |
-| LLM Runtime | Ollama |
-| LLM Models | phi3 / llama3 |
-| Orchestration | LangChain |
-| Embeddings | sentence-transformers |
-| Vector DB | FAISS |
-| Retrieval | LangChain Retriever |
-| Deployment | Docker |
-| API Docs | Swagger UI |
 | Language | Python |
+| Backend API | FastAPI |
+| Frontend UI | Streamlit |
+| LLM Runtime | Ollama |
+| LLM Model | llama3 |
+| Orchestration | LangChain |
+| Vector Database | FAISS |
+| Embeddings | sentence-transformers |
+| Retrieval | LangChain Retriever |
+| AI Workflow | Manual Workflow Orchestration |
+| Local Inference | Ollama |
+| Deployment | Docker |
 
 ---
 
-# Project Architecture
+# System Architecture
 
 ```text
-Client Request
-      ↓
-FastAPI REST API
-      ↓
-LangChain Evaluation Chain
-      ↓
-Retriever Abstraction
-      ↓
-FAISS Vector DB
-      ↓
+Client / Streamlit UI
+        ↓
+FastAPI Backend
+        ↓
+Agent Controller
+        ↓
+Workflow Layer
+        ↓
+Tools Layer
+   ├── Retrieval Tool
+   └── Evaluation Tool
+        ↓
+RAG Pipeline
+        ↓
+FAISS Vector Search
+        ↓
 Retrieved Context
-      ↓
+        ↓
 Prompt Augmentation
-      ↓
-PromptTemplate
-      ↓
-OllamaLLM
-      ↓
-JsonOutputParser
-      ↓
-Structured JSON Evaluation
+        ↓
+llama3 (Ollama)
+        ↓
+Structured Evaluation Output
+```
+
+---
+
+# Workflow Architecture
+
+The project uses explicit workflow orchestration instead of black-box autonomous agents.
+
+```text
+Question
+   ↓
+Retriever Tool
+   ↓
+Retrieved Context
+   ↓
+Evaluation Tool
+   ↓
+LLM Evaluation
+   ↓
+Structured Response
+```
+
+This architecture improves:
+
+- debuggability
+- modularity
+- orchestration visibility
+- workflow extensibility
+- future routing support
+
+---
+
+# Why Manual Workflow Orchestration?
+
+During development, an important limitation was discovered:
+
+- `phi3` in Ollama did not support reliable tool calling
+- `llama3` also lacked stable native `.bind_tools()` support in the current Ollama runtime
+
+Because of this, manual workflow orchestration was implemented instead of relying on framework-managed autonomous agents.
+
+This resulted in a cleaner and more transparent execution architecture.
+
+---
 
 # LangChain Concepts Implemented
 
 ## PromptTemplate
 
-Reusable prompt abstraction for structured evaluation prompts.
+Reusable structured prompts for evaluation workflows.
 
 ---
 
-## RunnableSequence (LCEL)
+## Runnable Chains
 
-LangChain Expression Language orchestration:
-
-```python
-prompt | llm | parser
-```
+Composable LangChain execution pipelines.
 
 ---
 
@@ -104,13 +160,42 @@ Using:
 retriever.invoke(question)
 ```
 
-instead of manual retrieval orchestration.
+instead of manual vector search handling.
 
 ---
 
-## JsonOutputParser
+## Tool Abstraction
 
-Structured JSON parsing and validation from LLM outputs.
+Implemented reusable AI capabilities using:
+
+```python
+@tool
+```
+
+Examples:
+
+- `retrieve_interview_knowledge`
+- `evaluate_candidate_answer`
+
+---
+
+## Workflow Layer
+
+Introduced explicit orchestration layer:
+
+```text
+Tools
+   ↓
+Workflows
+   ↓
+Agent Controller
+```
+
+to separate:
+- orchestration
+- execution
+- business logic
+- control flow
 
 ---
 
@@ -132,18 +217,21 @@ Interview-Evaluator-LLM/
 │   └── metadata.pkl
 │
 ├── src/
-│   ├── api/
-│   │   ├── main.py
-│   │   ├── routes.py
-│   │   ├── schemas.py
-│   │   └── services.py
+│   ├── agents/
+│   │   ├── agent.py
+│   │   ├── workflows.py
+│   │   ├── tools.py
+│   │   └── prompts.py
 │   │
 │   ├── langchain/
-│   │   ├── prompts.py
 │   │   ├── llm.py
-│   │   ├── output_parser.py
 │   │   ├── chains.py
-│   │   └── retriever.py
+│   │   ├── retriever.py
+│   │   ├── output_parser.py
+│   │   └── prompts.py
+│   │
+│   ├── parsers/
+│   │   └── evaluation_parser.py
 │   │
 │   ├── rag/
 │   │   ├── data_loader.py
@@ -151,13 +239,18 @@ Interview-Evaluator-LLM/
 │   │   ├── vector_store.py
 │   │   └── retriever.py
 │   │
-│   ├── evaluator.py
-│   └── main.py
+│   ├── api/
+│   │   ├── main.py
+│   │   ├── routes.py
+│   │   ├── services.py
+│   │   └── schemas.py
+│   │
+│   └── ui/
+│       └── streamlit_app.py
 │
 ├── build_vector_db.py
 ├── requirements.txt
 ├── Dockerfile
-├── .dockerignore
 └── README.md
 ```
 
@@ -171,8 +264,6 @@ Interview-Evaluator-LLM/
 git clone https://github.com/vaskarthik/Interview-Evaluator-LLM.git
 
 cd Interview-Evaluator-LLM
-
-git checkout exp/langchain-ai-orchestration
 ```
 
 ---
@@ -207,7 +298,7 @@ pip install -r requirements.txt
 
 # Install Ollama
 
-Download Ollama:
+Download:
 
 ```text
 https://ollama.com/download
@@ -215,13 +306,7 @@ https://ollama.com/download
 
 ---
 
-# Pull Local LLM Model
-
-```bash
-ollama pull phi3
-```
-
-or
+# Pull Local Model
 
 ```bash
 ollama pull llama3
@@ -239,13 +324,11 @@ ollama serve
 
 # Build Vector Database
 
-Generate embeddings and build FAISS vector DB:
-
 ```bash
 python build_vector_db.py
 ```
 
-This creates:
+This generates:
 
 ```text
 vector_db/
@@ -255,7 +338,7 @@ vector_db/
 
 ---
 
-# Run FastAPI Service
+# Run FastAPI Backend
 
 ```bash
 uvicorn src.api.main:app --reload
@@ -273,6 +356,14 @@ http://127.0.0.1:8000/docs
 
 ---
 
+# Run Streamlit UI
+
+```bash
+streamlit run src/ui/streamlit_app.py
+```
+
+---
+
 # API Endpoint
 
 ## POST `/evaluate`
@@ -281,59 +372,30 @@ http://127.0.0.1:8000/docs
 
 ```json
 {
-  "question": "What is a template?",
-  "candidate_answer": "Template is reusable generic code independent of datatype."
+  "question": "What is polymorphism in C++?",
+  "candidate_answer": "Polymorphism allows objects to behave differently based on implementation."
 }
 ```
 
 ---
 
-### Response
+### Example Response
 
 ```json
 {
-  "score": 7,
+  "score": 6,
   "strengths": [
-    "Correct understanding of generic reusable code"
+    "Basic understanding of polymorphism"
   ],
   "weaknesses": [
-    "Lacks deeper explanation of template instantiation"
+    "Lacks explanation of runtime polymorphism",
+    "Missing examples of virtual functions"
   ],
   "improvements": [
-    "Explain generic programming and template behavior in C++"
+    "Explain method overriding and virtual functions"
   ],
-  "final_feedback": "The answer demonstrates basic understanding but requires more technical depth."
+  "final_feedback": "The answer demonstrates partial understanding but lacks technical depth."
 }
-```
-
----
-
-# Dockerized Deployment
-
-## Build Docker Image
-
-```bash
-docker build -t interview-evaluator-ai .
-```
-
----
-
-## Run Docker Container
-
-```bash
-docker run -p 8000:8000 interview-evaluator-ai
-```
-
----
-
-# Important Docker Networking Note
-
-Inside Docker, `localhost` refers to the container itself.
-
-For Ollama communication from container → host machine:
-
-```python
-OLLAMA_BASE_URL = "http://host.docker.internal:11434"
 ```
 
 ---
@@ -343,75 +405,123 @@ OLLAMA_BASE_URL = "http://host.docker.internal:11434"
 ```text
 Question
    ↓
-Retriever.invoke()
+Workflow Layer
    ↓
-Relevant Context
+Retrieval Tool
+   ↓
+FAISS Similarity Search
+   ↓
+Retrieved Context
+   ↓
+Evaluation Tool
    ↓
 Prompt Augmentation
    ↓
-LangChain Chain
+llama3
    ↓
-OllamaLLM
-   ↓
-Structured JSON Output
+Structured Evaluation Output
 ```
+
+---
+
+# Key Engineering Learnings
+
+This project provided hands-on experience with:
+
+- Local LLM inference systems
+- RAG architecture
+- semantic retrieval pipelines
+- workflow orchestration
+- retrieval abstraction
+- LangChain execution chains
+- AI backend engineering
+- prompt contract design
+- structured output validation
+- parser layer design
+- local model limitations
+- FastAPI integration
+- Streamlit frontend integration
+- modular AI application architecture
+
+---
+
+# Important Practical Insights
+
+## Local LLM Tool Calling Limitations
+
+Current Ollama runtime showed limitations with:
+
+- native tool calling
+- `.bind_tools()`
+- structured output consistency
+
+This led to implementation of:
+- manual orchestration
+- explicit workflow execution
+- parser validation layers
+
+---
+
+## Structured Output Reliability
+
+Local models do not always reliably generate strict JSON.
+
+This project explores:
+- prompt contracts
+- validation layers
+- parser-based recovery
+- deterministic prompting strategies
 
 ---
 
 # Current Capabilities
 
-- RAG-based answer evaluation
-- Semantic retrieval
-- LangChain orchestration
-- Retriever abstraction
-- Local AI inference
-- Dockerized deployment
-- REST API serving
+- Technical interview evaluation
+- RAG-based context grounding
+- Semantic search
+- Local LLM inference
+- Workflow orchestration
 - Structured evaluation responses
+- API serving
+- Streamlit UI integration
+- Modular backend architecture
 
 ---
 
-# Future Improvements
+# Potential Future Enhancements
 
-- AI agents
-- Tool calling
-- Multi-agent evaluation
-- LangGraph workflows
+- Expanded interview knowledge base
+- Improved retrieval quality
+- Streaming responses
+- Better structured output reliability
 - Conversation memory
-- Candidate progress tracking
-- Streaming LLM responses
-- Authentication and API keys
-- Cloud deployment
-- Kubernetes deployment
+- Evaluation analytics dashboard
 
 ---
 
-# 🔀 Branch Evolution
+# Branch Evolution
 
 | Branch | Focus |
 |---|---|
-| `main` | Prompt Engineering + Gemini API |
+| `main` | Initial Prompt Engineering |
 | `exp/local-llm-ollama` | Local LLM Integration |
-| `exp/rag-vector-db` | RAG + Vector Database |
-| `exp/fastapi-ai-service` | FastAPI AI Backend Service |
-| `exp/dockerized-ai-service` | Dockerized AI Deployment |
-| `exp/langchain-ai-orchestration` | LangChain Orchestration + Retriever Abstraction |
+| `exp/rag-vector-db` | RAG + FAISS |
+| `exp/fastapi-ai-service` | FastAPI Backend |
+| `exp/dockerized-ai-service` | Dockerized Deployment |
+| `exp/langchain-ai-orchestration` | LangChain Integration |
+| `exp/tools-and-agents` | Workflow + Tools Architecture |
 
 ---
 
-# 👨‍💻 Author
+# Author
 
 ## Karthik Vas S
 
-GenAI Engineer | LLM Systems | RAG Pipelines | AI Backend Engineering
-
-GitHub:
-
-Karthik Vas GitHub Repository
+Software Engineer | GenAI Engineering | RAG Systems | AI Backend Engineering
 
 ---
 
-# 📌 Key Takeaway
+# Key Takeaway
 
 This project demonstrates the evolution from:
 
@@ -422,43 +532,20 @@ Local LLM Systems
         ↓
 Retrieval Augmented Generation (RAG)
         ↓
-FastAPI AI Backend
-        ↓
-Dockerized AI Service
-        ↓
 LangChain Orchestration
         ↓
-Retriever Abstraction
+Tool Abstraction
+        ↓
+Workflow-Based AI Architecture
+        ↓
+Structured AI Output Systems
 ```
 
-with a strong focus on:
-
-- understanding internal GenAI architecture
-- backend AI engineering
-- orchestration systems
-- retrieval abstraction
-- deployment workflows
-- containerized inference systems
-- modern RAG pipeline implementation
-- production-oriented AI application design
-
----
-
-# Learning Outcomes
-
-This project demonstrates practical experience with:
-
-- Generative AI backend engineering
-- LangChain orchestration
-- LCEL (LangChain Expression Language)
-- Retriever abstraction
-- RAG architecture
-- Semantic retrieval systems
-- FastAPI backend development
-- Docker containerization
-- Local LLM inference
-- AI deployment workflows
-- Structured prompt engineering
-- Vector database integration
-- AI infrastructure debugging
-- Container networking concepts
+with emphasis on:
+- practical GenAI engineering
+- modular AI system design
+- orchestration workflows
+- backend AI architecture
+- retrieval systems
+- local inference pipelines
+- production-oriented AI application development

@@ -3,6 +3,10 @@ from src.agents.tools import (
     evaluate_candidate_answer,
 )
 
+from src.parsers.evaluation_parser import (
+    parse_evaluation_output,
+)
+
 
 def interview_evaluation_workflow(
     question: str,
@@ -41,8 +45,15 @@ Additional Context:
     # Step 3 - Evaluate Answer
     # -------------------------------------------------------------
 
-    evaluation_result = evaluate_candidate_answer.invoke(
+    raw_evaluation = evaluate_candidate_answer.invoke(
         evaluation_input
+    )
+
+    print("\n========== RAW LLM OUTPUT ==========\n")
+    print(raw_evaluation)
+
+    parsed_evaluation = parse_evaluation_output(
+        raw_evaluation
     )
 
     # -------------------------------------------------------------
@@ -53,5 +64,5 @@ Additional Context:
         "question": question,
         "answer": answer,
         "retrieved_context": retrieved_context,
-        "evaluation": evaluation_result,
+        "evaluation": parsed_evaluation,
     }
